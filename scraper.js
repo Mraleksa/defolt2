@@ -66,7 +66,7 @@ db.serialize(function() {
 
   statement.finalize();
 });
-		
+db.close();		
 })
 						
 
