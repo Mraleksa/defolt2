@@ -4,6 +4,8 @@
   "dependencies": {
     "cheerio": "latest",
     "request": "latest",
+    "uniq": "latest",
+     "http-api-client": "latest",
     "sqlite3": "latest"
   },
   "keywords": [
