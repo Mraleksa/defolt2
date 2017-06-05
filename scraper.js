@@ -1,94 +1,103 @@
 var client = require('http-api-client');
+var d3 = require("d3");
 var sqlite3 = require("sqlite3").verbose();
-
-// Open a database handle
 var db = new sqlite3.Database("data.sqlite");
 
+//db.run("DELETE FROM data");
 
-	
-var currentCount =  "2017-05-29T10:53:37.484602+03:00"
-var p=0; var p2=0;
-   
+var p = 0;
+
+var formatTime = d3.timeFormat("%Y-%m-%d");
+
+var myDate = new Date();
+var dayOfMonth = myDate.getDate();
+myDate.setDate(dayOfMonth - 2);
+
+var start  = formatTime(myDate);
+console.log(start);
+
+
+var end  = formatTime(new Date());
+console.log(end);
+
+
    
 function piv(){  
 p++;
-client.request({url: 'https://public.api.openprocurement.org/api/2.3/plans?offset='+currentCount})
+client.request({url: 'https://public.api.openprocurement.org/api/2.3/contracts?offset='+start})
 		.then(function (data) {
 						 
 		
 			var dataset = data.getJSON().data;
 			
-			currentCount = data.getJSON().next_page.offset;			
-			console.log(currentCount)
+			start = data.getJSON().next_page.offset;			
+						
+			console.log(start)
 			
 			return dataset;
 		})	
 		.then(function (dataset) {	
 		
 			dataset.forEach(function(item) {
-				client.request({url: 'https://public.api.openprocurement.org/api/0/plans/'+item.id})
+				client.request({url: 'https://public.api.openprocurement.org/api/2.3/contracts/'+item.id})
 					.then(function (data) {
-/*
-var res = '{
-"id":"'+data.getJSON().data.id+'",
-"datePublished":"'+data.getJSON().data.datePublished+'",
-"cpv":"'+data.getJSON().data.classification.id+'",
-"name":"'+data.getJSON().data.procuringEntity.identifier.id+'", 
-"amount":'+data.getJSON().data.budget.amount+', 
-"currency":"'+data.getJSON().data.budget.currency+'", 
-"procurementMethod":"'+data.getJSON().data.tender.procurementMethod+'",
-"procurementMethodType":"'+data.getJSON().data.tender.procurementMethodType+'",
-"startDate":"'+data.getJSON().data.tender.tenderPeriod.startDate+'"},'
-*/					
 				
-					
+		
+
+
+var change = data.getJSON().data.changes[data.getJSON().data.changes.length-1].rationaleTypes[0];
+//console.log(change)			
+
+if(change=="itemPriceVariation"){
+	
+	var tender_id = data.getJSON().data.tender_id;
+	
+	client.request({url: 'https://public.api.openprocurement.org/api/2.3/tenders/'+tender_id})
+					.then(function (data) {
+						
 db.serialize(function() {
-
-  // Create new table
-  db.run("CREATE TABLE IF NOT EXISTS data (id TEXT,datePublished TEXT,cpv TEXT,amount INT)");
-
+	
+  db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,dateSigned TEXT,tenderID TEXT,procuringEntity TEXT,suppliers TEXT,numberOfBids INT,amount INT,cpv TEXT)");
+console.log(change)
+  //data.getJSON().data.dateSigned когда заключен контракт
+  //data.getJSON().data.suppliers.name поставщик
   
   // Insert a new record
-  var statement = db.prepare("INSERT INTO data VALUES (?,?,?,?)");
-
-statement.run(data.getJSON().data.id,data.getJSON().data.datePublished,data.getJSON().data.classification.id,data.getJSON().data.budget.amount);
-  //else none;
-   //console.log(item.dateModified)
+  var statement = db.prepare("INSERT INTO data VALUES (?,?,?,?,?,?,?,?)");
+  
+  statement.run(item.dateModified,data.getJSON().data.dateSigned,data.getJSON().data.tenderID,data.getJSON().data.procuringEntity.name,data.getJSON().data.suppliers.name,data.getJSON().data.numberOfBids,data.getJSON().data.value.amount,data.getJSON().data.items[0].classification.description);
+  console.log(item.dateModified)
   statement.finalize();
 });
+		
+})
+						
 
+}
+	
 					})
 					.catch(function  (error) {
-						console.log("error_detale")
+						//console.log("error_detale")
 						
 					});  
 				});
 		
 		})
 		.then(function () {	
-		if (p<10){piv ();}		
+		if (start.replace(/T.*/, "") != end) {piv ();}	
 		else {
-			console.log("stop")
-				p=0;
-				p2++;
-				console.log(p2)
-			setTimeout(function() {
-			
-				if (p2 < 2) {
-					piv ();
-				}
-				else {console.log("STOP")}
-				}, 5000);
+			console.log("STOP")
+			console.log(start.replace(/T.*/, ""))
+	
 		}		
 							
 		})
 		.catch( function (error) {
-		console.log("error")
-		piv ();
+			console.log("error")
+			piv ();
 		});   
 		
-		
-			
+					
 
 }
 
