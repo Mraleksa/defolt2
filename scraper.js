@@ -57,15 +57,15 @@ if(change=="itemPriceVariation"){
 						
 db.serialize(function() {
 	
-  db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,dateSigned TEXT,tenderID TEXT,procuringEntity TEXT,suppliers TEXT,numberOfBids INT,amount INT,cpv TEXT)");
+  db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,tenderID TEXT,procuringEntity TEXT,suppliers TEXT,numberOfBids INT,amount INT,cpv TEXT)");
 console.log(change)
   //data.getJSON().data.dateSigned когда заключен контракт
   //data.getJSON().data.suppliers.name поставщик
   
   // Insert a new record
-  var statement = db.prepare("INSERT INTO data VALUES (?,?,?,?,?,?,?,?)");
+  var statement = db.prepare("INSERT INTO data VALUES (?,?,?,?,?,?,?)");
   
-  statement.run(item.dateModified,data.getJSON().data.dateSigned,data.getJSON().data.tenderID,data.getJSON().data.procuringEntity.name,data.getJSON().data.suppliers.name,data.getJSON().data.numberOfBids,data.getJSON().data.value.amount,data.getJSON().data.items[0].classification.description);
+  statement.run(item.dateModified,data.getJSON().data.tenderID,data.getJSON().data.procuringEntity.name,data.getJSON().data.suppliers.name,data.getJSON().data.numberOfBids,data.getJSON().data.value.amount,data.getJSON().data.items[0].classification.description);
   console.log(item.dateModified)
   statement.finalize();
 });
