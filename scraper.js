@@ -4,7 +4,7 @@ var sqlite3 = require("sqlite3").verbose();
 var db = new sqlite3.Database("data.sqlite");
 
 //db.run("DELETE FROM data");
-var p = 0;
+var p = 0; 
 var formatTime = d3.timeFormat("%Y-%m-%d");
 var myDate = new Date();
 var dayOfMonth = myDate.getDate();
@@ -33,11 +33,9 @@ client.request({url: 'https://public.api.openprocurement.org/api/2.3/contracts?o
 var change = data.getJSON().data.changes[data.getJSON().data.changes.length-1].rationaleTypes[0];
 if(change=="itemPriceVariation"){
 	
-	//var contractId = data.getJSON().data.id;
 	var lotIdContracts = data.getJSON().data.items[0].relatedLot;
 	
 	
-	//var change0 = data.getJSON().data.changes[0].date;
 	var dateSigned = data.getJSON().data.dateSigned;
 	var amount = data.getJSON().data.value.amount;
 	var tender_id = data.getJSON().data.tender_id;
@@ -45,13 +43,16 @@ if(change=="itemPriceVariation"){
 	client.request({url: 'https://public.api.openprocurement.org/api/2.3/tenders/'+tender_id})
 					.then(function (data) {
 		
-		var lotIdTenders = data.getJSON().data.lots[0].id;
-		if(lotIdContracts=lotIdTenders){var save = (data.getJSON().data.lots[0].value.amount-amount)/data.getJSON().data.lots[0].value.amount*100}
-		//console.log(save)
+	for (var i = 1; i <= data.getJSON().data.lots.length; i++) {
+			if(lotIdContracts==data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].id){var startAmount =  data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].value.amount};
+			
+	   }
+	var save = (startAmount-amount)/startAmount*100;
+	//var save = 100;
 		
 		
 	db.serialize(function() {	
-	db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,dateSigned TEXT,save TEXT,tenderID TEXT,procuringEntity TEXT,numberOfBids INT,amount INT,cpv TEXT)");
+	db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,dateSigned TEXT,save INT,tenderID TEXT,procuringEntity TEXT,numberOfBids INT,amount INT,cpv TEXT)");
 	var statement = db.prepare("INSERT INTO data VALUES (?,?,?,?,?,?,?,?)");
   	
 	statement.run(item.dateModified,dateSigned,save,data.getJSON().data.tenderID,data.getJSON().data.procuringEntity.name,data.getJSON().data.numberOfBids,amount,data.getJSON().data.items[0].classification.description);
@@ -61,15 +62,21 @@ if(change=="itemPriceVariation"){
 
 
 	
-	})		
+	})
+	.catch(function  (error) {
+						//console.log("error_detale1")				
+					});  
 }
 //////////SQLite//////////////	
 					})
 					.catch(function  (error) {
-						//console.log("error_detale")				
+						//console.log("error_detale2")				
 					});  
 			});	
 		})
+		.catch(function  (error) {
+						//console.log("error_detale3")				
+					})
 		.then(function () {	
 			if (start.replace(/T.*/, "") != end) {piv ();}	
 			else {
@@ -83,4 +90,14 @@ if(change=="itemPriceVariation"){
 		});   					
 }
 
+ window.onerror = function(message, url, lineNumber) {
+    console.log("Поймана ошибка, выпавшая в глобальную область!\n" +
+      "Сообщение: " + message + "\n(" + url + ":" + lineNumber + ")");
+  };
+  
+  function readData() {
+    error(); // ой, что-то не так
+  }
+
+  readData();
 piv ();	
