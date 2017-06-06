@@ -30,9 +30,7 @@ client.request({url: 'https://public.api.openprocurement.org/api/2.3/contracts?o
 					.then(function (data) {	
 //////////SQLite//////////////
 
-var change = data.getJSON().data.changes[data.getJSON().data.changes.length-1].rationaleTypes[0];
-if(change=="itemPriceVariation"){
-	
+
 	var lotIdContracts = data.getJSON().data.items[0].relatedLot;
 	var tender_id = data.getJSON().data.tender_id;
 	
@@ -61,7 +59,7 @@ if(change=="itemPriceVariation"){
 	.catch(function  (error) {
 						//console.log("error_detale1")				
 					});  
-}
+
 //////////SQLite//////////////	
 					})
 					.catch(function  (error) {
