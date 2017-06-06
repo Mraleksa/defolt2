@@ -34,28 +34,23 @@ var change = data.getJSON().data.changes[data.getJSON().data.changes.length-1].r
 if(change=="itemPriceVariation"){
 	
 	var lotIdContracts = data.getJSON().data.items[0].relatedLot;
-	
-	
-	var dateSigned = data.getJSON().data.dateSigned;
-	var amount = data.getJSON().data.value.amount;
 	var tender_id = data.getJSON().data.tender_id;
 	
 	client.request({url: 'https://public.api.openprocurement.org/api/2.3/tenders/'+tender_id})
 					.then(function (data) {
 		
 	for (var i = 1; i <= data.getJSON().data.lots.length; i++) {
-			if(lotIdContracts==data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].id){var startAmount =  data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].value.amount};
-			
-	   }
+	    if(lotIdContracts==data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].id){var startAmount =  data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].value.amount};			
+	}
 	var save = (startAmount-amount)/startAmount*100;
 	//var save = 100;
 		
 		
 	db.serialize(function() {	
-	db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,dateSigned TEXT,save INT,tenderID TEXT,procuringEntity TEXT,numberOfBids INT,amount INT,cpv TEXT)");
-	var statement = db.prepare("INSERT INTO data VALUES (?,?,?,?,?,?,?,?)");
+	db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,lotIdContracts TEXT,save INT)");
+	var statement = db.prepare("INSERT INTO data VALUES (?,?,?)");
   	
-	statement.run(item.dateModified,dateSigned,save,data.getJSON().data.tenderID,data.getJSON().data.procuringEntity.name,data.getJSON().data.numberOfBids,amount,data.getJSON().data.items[0].classification.description);
+	statement.run(item.dateModified,lotIdContracts,save);
 	//console.log(change);
 	statement.finalize();
 	});
