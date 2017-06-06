@@ -85,14 +85,4 @@ if(change=="itemPriceVariation"){
 		});   					
 }
 
- window.onerror = function(message, url, lineNumber) {
-    console.log("Поймана ошибка, выпавшая в глобальную область!\n" +
-      "Сообщение: " + message + "\n(" + url + ":" + lineNumber + ")");
-  };
-  
-  function readData() {
-    error(); // ой, что-то не так
-  }
-
-  readData();
 piv ();	
