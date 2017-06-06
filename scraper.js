@@ -43,18 +43,18 @@ if(change=="itemPriceVariation"){
 	client.request({url: 'https://public.api.openprocurement.org/api/2.3/tenders/'+tender_id})
 					.then(function (data) {
 		
-	//for (var i = 1; i <= data.getJSON().data.lots.length; i++) {
-	//		if(lotIdContracts==data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].id){var startAmount =  data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].value.amount};
+	for (var i = 1; i <= data.getJSON().data.lots.length; i++) {
+			if(lotIdContracts==data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].id){var startAmount =  data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].value.amount};
 			
-	 //  }
+	   }
 	//var save = (startAmount-amount)/startAmount*100;
-		var save = 100;
+	//var save = 100;
 		
 	db.serialize(function() {	
-	db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,dateSigned TEXT,save INT,tenderID TEXT,procuringEntity TEXT,numberOfBids INT,amount INT,cpv TEXT)");
+	db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,dateSigned TEXT,startAmount INT,tenderID TEXT,procuringEntity TEXT,numberOfBids INT,amount INT,cpv TEXT)");
 	var statement = db.prepare("INSERT INTO data VALUES (?,?,?,?,?,?,?,?)");
   	
-	statement.run(item.dateModified,dateSigned,save,data.getJSON().data.tenderID,data.getJSON().data.procuringEntity.name,data.getJSON().data.numberOfBids,amount,data.getJSON().data.items[0].classification.description);
+	statement.run(item.dateModified,dateSigned,startAmount,data.getJSON().data.tenderID,data.getJSON().data.procuringEntity.name,data.getJSON().data.numberOfBids,amount,data.getJSON().data.items[0].classification.description);
 	//console.log(change);
 	statement.finalize();
 	});
