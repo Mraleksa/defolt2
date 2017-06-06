@@ -47,10 +47,10 @@ if(change=="itemPriceVariation"){
 		
 		
 	db.serialize(function() {	
-	db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,lotIdContracts TEXT,save INT)");
-	var statement = db.prepare("INSERT INTO data VALUES (?,?,?)");
+	db.run("CREATE TABLE IF NOT EXISTS data (lotIdContracts TEXT,save INT)");
+	var statement = db.prepare("INSERT INTO data VALUES (?,?)");
   	
-	statement.run(item.dateModified,lotIdContracts,save);
+	statement.run(lotIdContracts,save);
 	//console.log(change);
 	statement.finalize();
 	});
