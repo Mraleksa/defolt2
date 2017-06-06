@@ -8,7 +8,7 @@ var p = 0;
 var formatTime = d3.timeFormat("%Y-%m-%d");
 var myDate = new Date();
 var dayOfMonth = myDate.getDate();
-myDate.setDate(dayOfMonth - 3);
+myDate.setDate(dayOfMonth - 4);
 var start  = formatTime(myDate);
 console.log(start);
 var end  = formatTime(new Date());
@@ -30,24 +30,31 @@ client.request({url: 'https://public.api.openprocurement.org/api/2.3/contracts?o
 					.then(function (data) {	
 //////////SQLite//////////////
 
-
-	var lotIdContracts = data.getJSON().data.items[0].relatedLot;
+var change = data.getJSON().data.changes[data.getJSON().data.changes.length-1].rationaleTypes[0];
+if(change=="itemPriceVariation"){
+	
+	//var lotIdContracts = data.getJSON().data.items[0].relatedLot;
+	
+	
+	var dateSigned = data.getJSON().data.dateSigned;
+	var amount = data.getJSON().data.value.amount;
 	var tender_id = data.getJSON().data.tender_id;
 	
 	client.request({url: 'https://public.api.openprocurement.org/api/2.3/tenders/'+tender_id})
 					.then(function (data) {
 		
-	for (var i = 1; i <= data.getJSON().data.lots.length; i++) {
-	    if(lotIdContracts==data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].id){var startAmount =  data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].value.amount};			
-	}
-	
-		
+	//for (var i = 1; i <= data.getJSON().data.lots.length; i++) {
+	//		if(lotIdContracts==data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].id){var startAmount =  data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].value.amount};
+			
+	 //  }
+	//var save = (startAmount-amount)/startAmount*100;
+		var save = 100;
 		
 	db.serialize(function() {	
-	db.run("CREATE TABLE IF NOT EXISTS data (lotIdContracts TEXT,startAmount INT)");
-	var statement = db.prepare("INSERT INTO data VALUES (?,?)");
+	db.run("CREATE TABLE IF NOT EXISTS data (dateModified TEXT,dateSigned TEXT,save INT,tenderID TEXT,procuringEntity TEXT,numberOfBids INT,amount INT,cpv TEXT)");
+	var statement = db.prepare("INSERT INTO data VALUES (?,?,?,?,?,?,?,?)");
   	
-	statement.run(lotIdContracts,startAmount);
+	statement.run(item.dateModified,dateSigned,save,data.getJSON().data.tenderID,data.getJSON().data.procuringEntity.name,data.getJSON().data.numberOfBids,amount,data.getJSON().data.items[0].classification.description);
 	//console.log(change);
 	statement.finalize();
 	});
@@ -58,7 +65,7 @@ client.request({url: 'https://public.api.openprocurement.org/api/2.3/contracts?o
 	.catch(function  (error) {
 						//console.log("error_detale1")				
 					});  
-
+}
 //////////SQLite//////////////	
 					})
 					.catch(function  (error) {
