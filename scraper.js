@@ -8,7 +8,7 @@ var p = 0;
 var formatTime = d3.timeFormat("%Y-%m-%d");
 var myDate = new Date();
 var dayOfMonth = myDate.getDate();
-myDate.setDate(dayOfMonth - 4);
+myDate.setDate(dayOfMonth - 3);
 var start  = formatTime(myDate);
 console.log(start);
 var end  = formatTime(new Date());
@@ -40,15 +40,14 @@ client.request({url: 'https://public.api.openprocurement.org/api/2.3/contracts?o
 	for (var i = 1; i <= data.getJSON().data.lots.length; i++) {
 	    if(lotIdContracts==data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].id){var startAmount =  data.getJSON().data.lots[data.getJSON().data.lots.length-(i)].value.amount};			
 	}
-	var save = (startAmount-amount)/startAmount*100;
-	//var save = 100;
+	
 		
 		
 	db.serialize(function() {	
-	db.run("CREATE TABLE IF NOT EXISTS data (lotIdContracts TEXT,save INT)");
+	db.run("CREATE TABLE IF NOT EXISTS data (lotIdContracts TEXT,startAmount INT)");
 	var statement = db.prepare("INSERT INTO data VALUES (?,?)");
   	
-	statement.run(lotIdContracts,save);
+	statement.run(lotIdContracts,startAmount);
 	//console.log(change);
 	statement.finalize();
 	});
