@@ -4,7 +4,7 @@ var sqlite3 = require("sqlite3").verbose();
 var db = new sqlite3.Database("data.sqlite");
 
 client.request({
-    url: 'https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=USD&date=20161215&json'
+    url: 'https://api.morph.io/Mraleksa/Plans1/data.json?key=kySf3vNeyObyXvbJKG4u&query=select%20*%20from%20%27data%27%20limit%2010'
 }).then(function (response) {
     
 	console.log(response.getJSON());
